@@ -1,5 +1,5 @@
 "use client"
-import { PerspectiveCamera, Environment, ContactShadows, useGLTF } from "@react-three/drei"
+import { PerspectiveCamera, Environment, ContactShadows, useGLTF, Grid } from "@react-three/drei"
 import { DoubleSide } from "three";
 
 export default function Experience() {
@@ -22,7 +22,7 @@ export default function Experience() {
       <directionalLight
         position={[5, 6, 4]}
         intensity={2.2}
-        color="#fff5e8"
+        color="orange"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={20}
@@ -36,21 +36,34 @@ export default function Experience() {
       <directionalLight
         position={[-5, 3, -4]}
         intensity={0.6}
-        color="#cfe8ff"
+        color="white"
       />
 
     
       <directionalLight
         position={[0, 4, -6]}
-        intensity={1.2}
-        color="#ffffff"
+        intensity={1.3}
+        color="blue"
       />
 
       
       <ambientLight intensity={0.02} />
 
+      <Grid
+  position={[0, 0.001, 0]}
+  args={[50, 50]}
+  cellSize={0.5}
+  cellThickness={0.5}
+  cellColor="#2a2a2a"
+  sectionSize={2.5}
+  sectionThickness={1}
+  sectionColor="#3a3a3a"
+  fadeDistance={30}
+  fadeStrength={1}
+  infiniteGrid
+/>
      
-      <Environment preset="studio" />
+      <Environment preset="studio"  />
  
       <ContactShadows
         position={[0, -0.01, 0]}
@@ -60,21 +73,12 @@ export default function Experience() {
         far={4}
       />
 
-      <primitive object={car.scene} scale = {100} position = {[0, 0.05, 0]} />
+      <primitive object={car.scene} scale = {100} position = {[0, 0.06, 0]} />
 
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[50, 50]} />
-        <meshStandardMaterial
-          color="white"
-          roughness={0.04}
-          metalness={0.1}
-          side = {DoubleSide}
-        />
-      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+  <planeGeometry args={[50, 50]} />
+  <meshStandardMaterial side={DoubleSide} color="#FFF5F5" roughness={0.4} metalness={0.2} />
+</mesh>
     </>
   )
 }
