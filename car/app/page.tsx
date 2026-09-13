@@ -4,10 +4,8 @@ import { OrbitControls, KeyboardControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 
 const controls = [
-  { name: "wheelLeft", keys: ["ArrowLeft", "KeyA"] },
-  { name: "wheelRight", keys: ["ArrowRight", "KeyD"] },
-  { name: "toggleLights", keys: ["KeyL"] },
-  { name: "nextMode", keys: ["KeyM"] },
+  { name: "wheelForward", keys: ["ArrowUp", "KeyW"] },
+  { name: "wheelBackward", keys: ["ArrowDown", "KeyS"] },
 ];
 
 export default function Home() {

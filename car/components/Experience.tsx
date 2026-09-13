@@ -1,11 +1,53 @@
 "use client"
-import { PerspectiveCamera, Environment, ContactShadows, useGLTF, Grid } from "@react-three/drei"
-import { DoubleSide } from "three";
+import { PerspectiveCamera, Environment, ContactShadows, useGLTF, Grid, useKeyboardControls } from "@react-three/drei"
+import { useFrame } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
+import { DoubleSide, Object3D } from "three";
+
+
+
+
 
 export default function Experience() {
      
     const car = useGLTF('/car.glb');
+    const wheelFL = useRef<Object3D | null>(null);
+    const wheelFR = useRef<Object3D | null>(null);
+    const wheelRL = useRef<Object3D | null>(null);
+    const wheelRR = useRef<Object3D | null>(null);
 
+    const wheelForward = useKeyboardControls((state) => state.wheelForward);
+    const wheelBackward = useKeyboardControls((state) => state.wheelBackward);
+
+    useEffect(() => {
+        car.scene.traverse((child) => {
+          if(child.name === "3DWheel_Front_L") {
+            wheelFL.current = child;
+          }
+        })
+    }, [car])
+
+
+    useFrame((_, delta) => {
+        const turnSpeed = 5; 
+        const maxTurnAngle = 0.5;
+    
+      
+        let dir = 0;
+        if (wheelForward) dir = 1;  
+        if (wheelBackward) dir = -1; 
+    
+        const targetAngle = dir * maxTurnAngle;
+    
+       
+        [wheelFL, wheelFR].forEach((wheelRef) => {
+          if (wheelRef.current) {
+          
+            const currentAngle = wheelRef.current.rotation.y;
+            wheelRef.current.rotation.y += (targetAngle - currentAngle) * Math.min(turnSpeed * delta, 1);
+          }
+        });
+      });
 
   return (
     <>
@@ -73,7 +115,7 @@ export default function Experience() {
         far={4}
       />
 
-      <primitive object={car.scene} scale = {100} position = {[0, 0.06, 0]} />
+      <primitive  object={car.scene} scale = {100} position = {[0, 0.06, 0]} />
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
   <planeGeometry args={[50, 50]} />
