@@ -8,11 +8,12 @@ import gsap from 'gsap'
 
 interface ExperienceProps {
     carColor: string;
-    drive: Boolean
+    drive: boolean;
+    onSpeedChange: (speed: number) => void;
   }
   
 
-export default function Experience({carColor, drive} : ExperienceProps) {
+export default function Experience({carColor, drive, onSpeedChange} : ExperienceProps) {
 
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
      
@@ -147,7 +148,7 @@ const cameraOffset = useRef(new THREE.Vector3());
 useFrame((_, delta) => {
     if (!carRef.current) return;
   
-    const maxSpeed = 8;
+    const maxSpeed = 22;
     const maxReverseSpeed = 3;
     const acceleration = 5;
     const brakeStrength = 10;
@@ -182,6 +183,10 @@ useFrame((_, delta) => {
         velocity.current += rollingResistance * delta;
       }
     }
+
+    const speedKmh = Math.abs(velocity.current) * 12;
+
+    onSpeedChange(speedKmh);
   
     
     if (Math.abs(velocity.current) < 0.02) {
@@ -252,6 +257,20 @@ useFrame((_, delta) => {
       
       if (wheelRR.current) {
         wheelRR.current.rotation.x += wheelRotation;
+      }
+
+      onSpeedChange(
+        Math.abs(velocity.current) * 12
+      );
+
+      if (accelerate) {
+        const accelerationFactor =
+          1 - Math.abs(velocity.current) / maxSpeed;
+      
+        velocity.current +=
+          acceleration *
+          Math.max(accelerationFactor, 0.15) *
+          delta;
       }
   });
 

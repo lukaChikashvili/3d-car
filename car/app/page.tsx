@@ -3,6 +3,7 @@
 import ColorSelector from "@/components/ColorSelector";
 import Experience from "@/components/Experience";
 import Header from "@/components/Header";
+import SpeedHUD from "@/components/SpeedHUD";
 import UIOverlay from "@/components/UIOverlay";
 
 import {
@@ -28,6 +29,8 @@ export default function Home() {
   const [carColor, setCarColor] = useState("#00abcb");
   const [drive, setDrive] = useState(false);
   const orbitControlsRef = useRef<any>(null);
+  const [speed, setSpeed] = useState(0);
+
 
   useEffect(() => {
     if (!orbitControlsRef.current) return;
@@ -42,6 +45,9 @@ export default function Home() {
 
        
         <UIOverlay isOpen={showHUD} />
+        <SpeedHUD
+          speed={speed}
+          drive={drive} />
 
         <ColorSelector
              isOpen={colorOpen}
@@ -79,7 +85,7 @@ export default function Home() {
   maxPolarAngle={Math.PI / 2.1}
 />
 
-          <Experience carColor={carColor} drive = {drive} />
+          <Experience onSpeedChange={setSpeed} carColor={carColor} drive = {drive} />
         </Canvas>
 
       </KeyboardControls>
