@@ -14,9 +14,13 @@ export default function Experience() {
     const bonnetRef = useRef<Object3D | null>(null);
     const bonnetPivot = useRef<Object3D | null>(null);
 
+    const lightsMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
+
+
     const wheelForward = useKeyboardControls((state) => state.wheelForward);
     const wheelBackward = useKeyboardControls((state) => state.wheelBackward);
     const bonnetPressed = useKeyboardControls((state) => state.bonnet);
+    const lightsPressed = useKeyboardControls((state) => state.headlights);
 
     useEffect(() => {
         car.scene.traverse((child) => {
@@ -25,6 +29,18 @@ export default function Experience() {
           }
           if(child.name === "3DWheel_Front_R") {
             wheelFR.current = child;
+          }
+
+          if(child.name === "untitledSM_FrontKit_0000_009_SM_FrontKit_0000_009_MAT_CarPaint_SU7_Base_032_untitledMAT_Lights_216_0" || 
+          child.name === "untitledSM_FrontKit_0000_009_SM_FrontKit_0000_009_MAT_CarPaint_SU7_Base_033_Light_glass_0") {
+             // lights
+             const mesh = child as THREE.Mesh;
+
+             if(mesh.material) {
+                const mat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+                lightsMatRef.current = mat as THREE.MeshStandardMaterial;
+             }
+
           }
 
           if(child.name === "untitledSM_Hood_0000_009_SM_Hood_0000_009_MAT_CarPaint_SU7_Base_041_untitledMAT_CarPaint_SU7_Base1_0") {
@@ -98,6 +114,16 @@ export default function Experience() {
         );
       });
 
+      useFrame((_, delta) => {
+        if (lightsMatRef.current) {
+          const targetIntensity = lightsPressed ? 5 : 0; 
+          
+
+          lightsMatRef.current.emissive = new THREE.Color("yellow"); 
+          lightsMatRef.current.emissiveIntensity += (targetIntensity - lightsMatRef.current.emissiveIntensity) * Math.min(10 * delta, 1);
+        }
+      });
+
   return (
     <>
    
@@ -110,35 +136,7 @@ export default function Experience() {
       />
 
       
-      <directionalLight
-        position={[5, 6, 4]}
-        intensity={2.2}
-        color="orange"
-        castShadow
-        shadow-mapSize={[2048, 2048]}
-        shadow-camera-far={20}
-        shadow-camera-left={-8}
-        shadow-camera-right={8}
-        shadow-camera-top={8}
-        shadow-camera-bottom={-8}
-      />
-
-     
-      <directionalLight
-        position={[-5, 3, -4]}
-        intensity={0.6}
-        color="white"
-      />
-
-    
-      <directionalLight
-        position={[0, 4, -6]}
-        intensity={1.3}
-        color="blue"
-      />
-
       
-      <ambientLight intensity={0.02} />
 
       <Grid
   position={[0, 0.001, 0]}
@@ -170,6 +168,31 @@ export default function Experience() {
   <planeGeometry args={[50, 50]} />
   <meshStandardMaterial side={DoubleSide} color="#FFF5F5" roughness={0.4} metalness={0.2} />
 </mesh>
+
+{lightsPressed && (
+  <group position={[0, 0.6, 2.2]}> 
+    
+    <spotLight
+      position={[-0.7, 0, 0]}
+      target-position={[-0.7, 0, 10]}
+      angle={0.4}
+      penumbra={0.5}
+      intensity={15}
+      color="gold"
+      castShadow
+    />
+  
+    <spotLight
+      position={[0.7, 0, 0]}
+      target-position={[0.7, 0, 10]}
+      angle={0.4}
+      penumbra={0.5}
+      intensity={15}
+      color="#e6f2ff"
+      castShadow
+    />
+  </group>
+)}
     </>
   )
 }

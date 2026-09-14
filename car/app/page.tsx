@@ -7,6 +7,7 @@ const controls = [
   { name: "wheelForward", keys: ["ArrowUp", "KeyW"] },
   { name: "wheelBackward", keys: ["ArrowDown", "KeyS"]},
   { name: "bonnet", keys: ["KeyB"] },
+  {name: "headlights", keys: ["KeyL"]}
 ];
 
 export default function Home() {
