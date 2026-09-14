@@ -26,6 +26,7 @@ export default function Home() {
   const [showHUD, setShowHUD] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
   const [carColor, setCarColor] = useState("#00abcb");
+  const [drive, setDrive] = useState(false);
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
@@ -46,6 +47,11 @@ export default function Home() {
           onColorClick={() =>
             setColorOpen((prev) => !prev)
           }
+          startTestDrive={() => {
+             setDrive((prev) => !prev)
+          }}
+
+
         />
 
         <Canvas
@@ -64,7 +70,7 @@ export default function Home() {
             maxPolarAngle={Math.PI / 2.1}
           />
 
-          <Experience carColor={carColor} />
+          <Experience carColor={carColor} drive = {drive} />
         </Canvas>
 
       </KeyboardControls>

@@ -4,13 +4,17 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { DoubleSide, Object3D } from "three";
 import * as THREE from 'three'
+import gsap from 'gsap'
 
 interface ExperienceProps {
     carColor: string;
+    drive: Boolean
   }
   
 
-export default function Experience({carColor} : ExperienceProps) {
+export default function Experience({carColor, drive} : ExperienceProps) {
+
+    const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
      
     const car = useGLTF('/car.glb');
     const wheelFLPivot = useRef<Object3D | null>(null);
@@ -279,16 +283,41 @@ useFrame((_, delta) => {
     );
   });
 
+
+  // camera animation
+  useEffect(() => {
+    if (!drive || !cameraRef.current) return;
+  
+    const camera = cameraRef.current;
+  
+    gsap.to(camera.position, {
+      x: 0,
+      y: 2.4,
+      z: -6,
+      duration: 1.5,
+      ease: "power3.inOut",
+    });
+  
+    gsap.to(camera.rotation, {
+      x: 0,
+      y: Math.PI,
+      z: 0,
+      duration: 1.5,
+      ease: "power3.inOut",
+    });
+  }, [drive]);
+
   return (
     <>
    
-      <PerspectiveCamera
-        makeDefault
-        position={[4, 1.8, 5]}
-        fov={35}
-        near={0.1}
-        far={100}
-      />
+   <PerspectiveCamera
+  ref={cameraRef}
+  makeDefault
+  position={[4, 1.8, 5]}
+  fov={35}
+  near={0.1}
+  far={100}
+/>
 
       
       
