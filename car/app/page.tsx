@@ -11,7 +11,7 @@ import {
 } from "@react-three/drei";
 
 import { Canvas } from "@react-three/fiber";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const controls = [
   { name: "accelerate", keys: ["ArrowUp", "KeyW"] },
@@ -27,6 +27,13 @@ export default function Home() {
   const [colorOpen, setColorOpen] = useState(false);
   const [carColor, setCarColor] = useState("#00abcb");
   const [drive, setDrive] = useState(false);
+  const orbitControlsRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!orbitControlsRef.current) return;
+  
+    orbitControlsRef.current.enabled = !drive;
+  }, [drive]);
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
@@ -63,12 +70,14 @@ export default function Home() {
             far: 100,
           }}
         >
-          <OrbitControls
-            makeDefault
-            minDistance={3}
-            maxDistance={10}
-            maxPolarAngle={Math.PI / 2.1}
-          />
+        
+        <OrbitControls
+  ref={orbitControlsRef}
+  makeDefault
+  minDistance={3}
+  maxDistance={10}
+  maxPolarAngle={Math.PI / 2.1}
+/>
 
           <Experience carColor={carColor} drive = {drive} />
         </Canvas>

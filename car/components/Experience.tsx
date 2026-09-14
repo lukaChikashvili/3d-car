@@ -20,6 +20,11 @@ export default function Experience({carColor, drive} : ExperienceProps) {
     const wheelFLPivot = useRef<Object3D | null>(null);
     const wheelFRPivot = useRef<Object3D | null>(null);
 
+    const cameraTarget = useRef(new THREE.Vector3());
+const cameraPosition = useRef(new THREE.Vector3());
+const cameraOffset = useRef(new THREE.Vector3());
+
+
     const wheelFL = useRef<Object3D | null>(null);
     const wheelFR = useRef<Object3D | null>(null);
 
@@ -302,10 +307,45 @@ useFrame((_, delta) => {
       x: 0,
       y: Math.PI,
       z: 0,
-      duration: 1.5,
+      duration: 2.5,
+      delay: 1,
       ease: "power3.inOut",
     });
   }, [drive]);
+
+ 
+
+  useFrame((_, delta) => {
+    if (!drive || !cameraRef.current || !carRef.current) return;
+  
+    const car = carRef.current;
+    const camera = cameraRef.current;
+  
+
+    car.getWorldPosition(cameraTarget.current);
+  
+  
+    cameraOffset.current.set(0, 2, -5);
+  
+ 
+    cameraOffset.current.applyQuaternion(car.quaternion);
+  
+    cameraPosition.current.copy(cameraTarget.current);
+    cameraPosition.current.add(cameraOffset.current);
+  
+
+    const smoothness = 6;
+  
+    camera.position.lerp(
+      cameraPosition.current,
+      1 - Math.exp(-smoothness * delta)
+    );
+  
+   
+    cameraTarget.current.y += 0.3;
+  
+    camera.lookAt(cameraTarget.current);
+  });
 
   return (
     <>
