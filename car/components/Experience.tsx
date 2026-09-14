@@ -3,9 +3,7 @@ import { PerspectiveCamera, Environment, ContactShadows, useGLTF, Grid, useKeybo
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { DoubleSide, Object3D } from "three";
-
-
-
+import * as THREE from 'three'
 
 
 export default function Experience() {
@@ -13,11 +11,12 @@ export default function Experience() {
     const car = useGLTF('/car.glb');
     const wheelFL = useRef<Object3D | null>(null);
     const wheelFR = useRef<Object3D | null>(null);
-    const wheelRL = useRef<Object3D | null>(null);
-    const wheelRR = useRef<Object3D | null>(null);
+    const bonnetRef = useRef<Object3D | null>(null);
+    const bonnetPivot = useRef<Object3D | null>(null);
 
     const wheelForward = useKeyboardControls((state) => state.wheelForward);
     const wheelBackward = useKeyboardControls((state) => state.wheelBackward);
+    const bonnetPressed = useKeyboardControls((state) => state.bonnet);
 
     useEffect(() => {
         car.scene.traverse((child) => {
@@ -26,6 +25,30 @@ export default function Experience() {
           }
           if(child.name === "3DWheel_Front_R") {
             wheelFR.current = child;
+          }
+
+          if(child.name === "untitledSM_Hood_0000_009_SM_Hood_0000_009_MAT_CarPaint_SU7_Base_041_untitledMAT_CarPaint_SU7_Base1_0") {
+            bonnetRef.current = child;
+
+            const pivot = new THREE.Object3D();
+
+           
+            child.parent?.add(pivot);
+      
+         
+            pivot.position.copy(child.position);
+            pivot.rotation.copy(child.rotation);
+            pivot.scale.copy(child.scale);
+      
+        
+            child.position.set(0, 0, 0);
+            child.rotation.set(0, 0, 0);
+            child.scale.set(1, 1, 1);
+      
+            pivot.add(child);
+      
+            bonnetPivot.current = pivot;
+
           }
         })
     }, [car])
@@ -54,6 +77,25 @@ export default function Experience() {
             const invertedTargetAngle = -targetAngle; 
             wheelFR.current.rotation.y += (invertedTargetAngle - currentAngle) * Math.min(turnSpeed * delta, 1);
           }
+      });
+
+
+      useFrame((_, delta) => {
+        if (!bonnetPivot.current) return;
+      
+        const openSpeed = 4;
+        const maxOpenAngle = -0.8;
+      
+        const targetAngle = bonnetPressed
+          ? maxOpenAngle
+          : 0;
+      
+        bonnetPivot.current.rotation.x = THREE.MathUtils.damp(
+          bonnetPivot.current.rotation.x,
+          targetAngle,
+          openSpeed,
+          delta
+        );
       });
 
   return (

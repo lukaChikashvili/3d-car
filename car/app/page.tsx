@@ -5,7 +5,8 @@ import { Canvas } from "@react-three/fiber";
 
 const controls = [
   { name: "wheelForward", keys: ["ArrowUp", "KeyW"] },
-  { name: "wheelBackward", keys: ["ArrowDown", "KeyS"] },
+  { name: "wheelBackward", keys: ["ArrowDown", "KeyS"]},
+  { name: "bonnet", keys: ["KeyB"] },
 ];
 
 export default function Home() {
