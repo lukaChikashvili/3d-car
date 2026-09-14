@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { DoubleSide, Object3D } from "three";
 import * as THREE from 'three'
 import gsap from 'gsap'
+import Road from "./Road";
 
 interface ExperienceProps {
     carColor: string;
@@ -421,6 +422,11 @@ useFrame((_, delta) => {
   <planeGeometry args={[50, 50]} />
   <meshStandardMaterial side={DoubleSide} color="#FFF5F5" roughness={0.4} metalness={0.2} />
 </mesh>
+
+
+
+<Road width={10} length={1000} />
+
 
 {lightsPressed && (
   <group position={[0, 0.6, 2.2]}> 
