@@ -5,8 +5,12 @@ import { useEffect, useRef } from "react";
 import { DoubleSide, Object3D } from "three";
 import * as THREE from 'three'
 
+interface ExperienceProps {
+    carColor: string;
+  }
+  
 
-export default function Experience() {
+export default function Experience({carColor} : ExperienceProps) {
      
     const car = useGLTF('/car.glb');
     const wheelFL = useRef<Object3D | null>(null);
@@ -24,6 +28,8 @@ export default function Experience() {
 
     useEffect(() => {
         car.scene.traverse((child) => {
+            if (!(child instanceof THREE.Mesh)) return;
+            
           if(child.name === "3DWheel_Front_L") {
             wheelFL.current = child;
           }
@@ -41,6 +47,11 @@ export default function Experience() {
                 lightsMatRef.current = mat as THREE.MeshStandardMaterial;
              }
 
+          }
+
+
+          if(child.name === "untitledSM_FrontKit_0000_009_SM_FrontKit_0000_009_MAT_CarPaint_SU7_Base_030_untitledMAT_CarPaint_SU7_Base1_0") {
+            child.material.color.set(carColor);
           }
 
           if(child.name === "untitledSM_Hood_0000_009_SM_Hood_0000_009_MAT_CarPaint_SU7_Base_041_untitledMAT_CarPaint_SU7_Base1_0") {
@@ -67,7 +78,7 @@ export default function Experience() {
 
           }
         })
-    }, [car])
+    }, [car, carColor])
 
 
     useFrame((_, delta) => {

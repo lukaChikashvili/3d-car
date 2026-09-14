@@ -5,19 +5,26 @@ import gsap from "gsap";
 
 interface ColorSelectorProps {
   isOpen: boolean;
+  onColorSelect: (color: string) => void;
 }
 
 const colors = [
-  { name: "Obsidian", value: "#111111" },
-  { name: "Pearl", value: "#F1F1EE" },
-  { name: "Crimson", value: "#8F1515" },
-  { name: "Silver", value: "#8D9296" },
-  { name: "Ocean", value: "#183A52" },
-  { name: "Gold", value: "#9A7B32" },
+    { name: "main", value: "#00abcb" },
+  { name: "Gulf", value: "#2E5368" },
+  { name: "Olive Green", value: "#4B5748" },
+  { name: "Elegant Gray", value: "#6B6D6C" },
+  { name: "Radiant Purple", value: "#6D526F" },
+  { name: "Meteor Blue", value: "#547B94" },
+  { name: "Lava Orange", value: "#D65A24" },
+  { name: "Cambrian", value: "#59636A" },
+  { name: "red", value: "#B3262D" },
+  { name: "black", value: "black" },
+  
 ];
 
 export default function ColorSelector({
   isOpen,
+  onColorSelect,
 }: ColorSelectorProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<(HTMLButtonElement | null)[]>([]);
@@ -29,9 +36,7 @@ export default function ColorSelector({
     if (!panel) return;
 
     if (isOpen) {
-      gsap.set(panel, {
-        display: "block",
-      });
+      gsap.set(panel, { display: "block" });
 
       const tl = gsap.timeline();
 
@@ -76,9 +81,7 @@ export default function ColorSelector({
         duration: 0.25,
         ease: "power2.in",
         onComplete: () => {
-          gsap.set(panel, {
-            display: "none",
-          });
+          gsap.set(panel, { display: "none" });
         },
       });
     }
@@ -108,11 +111,8 @@ export default function ColorSelector({
           px-5
           py-4
           shadow-[0_10px_30px_rgba(0,0,0,0.5)]
-          
         "
       >
-        
-
         <div className="flex flex-col mr-2">
           <span className="text-[9px] font-mono tracking-[0.2em] text-black/40 uppercase">
             Vehicle
@@ -123,7 +123,6 @@ export default function ColorSelector({
           </span>
         </div>
 
-
         <div className="h-8 w-px bg-black/10" />
 
         <div className="flex items-center gap-3">
@@ -133,6 +132,7 @@ export default function ColorSelector({
               ref={(el) => {
                 itemsRef.current[index] = el;
               }}
+              onClick={() => onColorSelect(color.value)}
               className="
                 group
                 relative
@@ -159,8 +159,6 @@ export default function ColorSelector({
                   backgroundColor: color.value,
                 }}
               />
-
-             
 
               <span
                 className="

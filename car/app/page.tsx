@@ -23,6 +23,7 @@ const controls = [
 export default function Home() {
   const [showHUD, setShowHUD] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
+  const [carColor, setCarColor] = useState("#00abcb");
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
@@ -32,7 +33,9 @@ export default function Home() {
        
         <UIOverlay isOpen={showHUD} />
 
-        <ColorSelector isOpen={colorOpen} />
+        <ColorSelector
+             isOpen={colorOpen}
+             onColorSelect={setCarColor} />
 
         <Header
           onKeyboardClick={() =>
@@ -59,7 +62,7 @@ export default function Home() {
             maxPolarAngle={Math.PI / 2.1}
           />
 
-          <Experience />
+          <Experience carColor={carColor} />
         </Canvas>
 
       </KeyboardControls>
