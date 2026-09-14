@@ -24,6 +24,9 @@ export default function Experience() {
           if(child.name === "3DWheel_Front_L") {
             wheelFL.current = child;
           }
+          if(child.name === "3DWheel_Front_R") {
+            wheelFR.current = child;
+          }
         })
     }, [car])
 
@@ -40,13 +43,17 @@ export default function Experience() {
         const targetAngle = dir * maxTurnAngle;
     
        
-        [wheelFL, wheelFR].forEach((wheelRef) => {
-          if (wheelRef.current) {
-          
-            const currentAngle = wheelRef.current.rotation.y;
-            wheelRef.current.rotation.y += (targetAngle - currentAngle) * Math.min(turnSpeed * delta, 1);
+        if (wheelFL.current) {
+            const currentAngle = wheelFL.current.rotation.y;
+            wheelFL.current.rotation.y += (targetAngle - currentAngle) * Math.min(turnSpeed * delta, 1);
           }
-        });
+        
+        
+          if (wheelFR.current) {
+            const currentAngle = wheelFR.current.rotation.y;
+            const invertedTargetAngle = -targetAngle; 
+            wheelFR.current.rotation.y += (invertedTargetAngle - currentAngle) * Math.min(turnSpeed * delta, 1);
+          }
       });
 
   return (
