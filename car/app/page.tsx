@@ -14,12 +14,14 @@ import { Canvas } from "@react-three/fiber";
 import { useState } from "react";
 
 const controls = [
-  { name: "wheelForward", keys: ["ArrowUp", "KeyW"] },
-  { name: "wheelBackward", keys: ["ArrowDown", "KeyS"] },
+  { name: "accelerate", keys: ["ArrowUp", "KeyW"] },
+  { name: "brake", keys: ["ArrowDown", "KeyS"] },
+  { name: "turnLeft", keys: ["ArrowLeft", "KeyA"] },
+  { name: "turnRight", keys: ["ArrowRight", "KeyD"] },
+  { name: "handbrake", keys: ["Space"] },
   { name: "bonnet", keys: ["KeyB"] },
   { name: "headlights", keys: ["KeyL"] },
 ];
-
 export default function Home() {
   const [showHUD, setShowHUD] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);

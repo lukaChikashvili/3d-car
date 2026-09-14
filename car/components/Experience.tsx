@@ -13,10 +13,22 @@ interface ExperienceProps {
 export default function Experience({carColor} : ExperienceProps) {
      
     const car = useGLTF('/car.glb');
+    const wheelFLPivot = useRef<Object3D | null>(null);
+    const wheelFRPivot = useRef<Object3D | null>(null);
+
     const wheelFL = useRef<Object3D | null>(null);
     const wheelFR = useRef<Object3D | null>(null);
+
+    const wheelRL = useRef<Object3D | null>(null);
+    const wheelRR = useRef<Object3D | null>(null);
+
     const bonnetRef = useRef<Object3D | null>(null);
     const bonnetPivot = useRef<Object3D | null>(null);
+
+    const carRef = useRef<THREE.Group>(null);
+
+    const velocity = useRef(0);
+    const steering = useRef(0);
 
     const lightsMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
 
@@ -26,15 +38,55 @@ export default function Experience({carColor} : ExperienceProps) {
     const bonnetPressed = useKeyboardControls((state) => state.bonnet);
     const lightsPressed = useKeyboardControls((state) => state.headlights);
 
+    const accelerate = useKeyboardControls( (state) => state.accelerate);
+    const brake = useKeyboardControls((state) => state.brake);
+    const turnLeft = useKeyboardControls((state) => state.turnLeft);
+    const turnRight = useKeyboardControls( (state) => state.turnRight);
+    const handbrake = useKeyboardControls((state) => state.handbrake );
+
     useEffect(() => {
         car.scene.traverse((child) => {
-            if (!(child instanceof THREE.Mesh)) return;
-            
+           
+
           if(child.name === "3DWheel_Front_L") {
-            wheelFL.current = child;
+            const pivot = new THREE.Object3D();
+
+              child.parent?.add(pivot);
+            
+              pivot.position.copy(child.position);
+              pivot.rotation.copy(child.rotation);
+            
+              child.position.set(0, 0, 0);
+              child.rotation.set(0, 0, 0);
+            
+              pivot.add(child);
+            
+              wheelFLPivot.current = pivot;
+              wheelFL.current = child;
           }
           if(child.name === "3DWheel_Front_R") {
+            const pivot = new THREE.Object3D();
+
+            child.parent?.add(pivot);
+          
+            pivot.position.copy(child.position);
+            pivot.rotation.copy(child.rotation);
+          
+            child.position.set(0, 0, 0);
+            child.rotation.set(0, 0, 0);
+          
+            pivot.add(child);
+          
+            wheelFRPivot.current = pivot;
             wheelFR.current = child;
+          }
+
+          if (child.name === "3DWheel_Rear_L") {
+            wheelRL.current = child;
+          }
+          
+          if (child.name === "3DWheel_Rear_R") {
+            wheelRR.current = child;
           }
 
           if(child.name === "untitledSM_FrontKit_0000_009_SM_FrontKit_0000_009_MAT_CarPaint_SU7_Base_032_untitledMAT_Lights_216_0" || 
@@ -49,6 +101,7 @@ export default function Experience({carColor} : ExperienceProps) {
 
           }
 
+          if (!(child instanceof THREE.Mesh)) return;
 
           if(child.name === "untitledSM_FrontKit_0000_009_SM_FrontKit_0000_009_MAT_CarPaint_SU7_Base_030_untitledMAT_CarPaint_SU7_Base1_0") {
             child.material.color.set(carColor);
@@ -81,59 +134,150 @@ export default function Experience({carColor} : ExperienceProps) {
     }, [car, carColor])
 
 
-    useFrame((_, delta) => {
-        const turnSpeed = 5; 
-        const maxTurnAngle = 0.5;
     
-      
-        let dir = 0;
-        if (wheelForward) dir = 1;  
-        if (wheelBackward) dir = -1; 
+useFrame((_, delta) => {
+    if (!carRef.current) return;
+  
+    const maxSpeed = 8;
+    const maxReverseSpeed = 3;
+    const acceleration = 5;
+    const brakeStrength = 10;
+    const steeringSpeed = 5;
+    const maxSteeringAngle = 0.55;
+    const rollingResistance = 2;
+  
+
+    if (accelerate) {
+      velocity.current += acceleration * delta;
+    }
+  
+ 
+    if (brake) {
+      if (velocity.current > 0) {
+        velocity.current -= brakeStrength * delta;
+      } else {
+        velocity.current -= acceleration * delta;
+      }
+    }
+  
+ 
+    if (handbrake) {
+      velocity.current *= Math.max(0, 1 - 8 * delta);
+    }
+  
+  
+    if (!accelerate && !brake) {
+      if (velocity.current > 0) {
+        velocity.current -= rollingResistance * delta;
+      } else if (velocity.current < 0) {
+        velocity.current += rollingResistance * delta;
+      }
+    }
+  
     
-        const targetAngle = dir * maxTurnAngle;
+    if (Math.abs(velocity.current) < 0.02) {
+      velocity.current = 0;
+    }
+  
+    velocity.current = THREE.MathUtils.clamp(
+      velocity.current,
+      -maxReverseSpeed,
+      maxSpeed
+    );
+  
+ 
+    let steeringTarget = 0;
+  
+    if (turnLeft) {
+      steeringTarget = maxSteeringAngle;
+    }
+  
+    if (turnRight) {
+      steeringTarget = -maxSteeringAngle;
+    }
+  
+    steering.current = THREE.MathUtils.damp(
+      steering.current,
+      steeringTarget,
+      steeringSpeed,
+      delta
+    );
+  
+
+    if (Math.abs(velocity.current) > 0.01) {
+      const turnStrength = 0.9;
+  
+      carRef.current.rotation.y +=
+        steering.current *
+        turnStrength *
+        velocity.current *
+        delta;
+    }
+  
     
-       
-        if (wheelFL.current) {
-            const currentAngle = wheelFL.current.rotation.y;
-            wheelFL.current.rotation.y += (targetAngle - currentAngle) * Math.min(turnSpeed * delta, 1);
-          }
-        
-        
-          if (wheelFR.current) {
-            const currentAngle = wheelFR.current.rotation.y;
-            const invertedTargetAngle = -targetAngle; 
-            wheelFR.current.rotation.y += (invertedTargetAngle - currentAngle) * Math.min(turnSpeed * delta, 1);
-          }
-      });
-
-
-      useFrame((_, delta) => {
-        if (!bonnetPivot.current) return;
+    const distance = velocity.current * delta;
+    carRef.current.translateZ(distance);
+    
+    const wheelRadius = 0.35;
+    const wheelRotation = distance / wheelRadius;
+    
+    if (wheelFLPivot.current) {
+        wheelFLPivot.current.rotation.y = steering.current;
+      }
       
-        const openSpeed = 4;
-        const maxOpenAngle = -0.8;
+      if (wheelFRPivot.current) {
+        wheelFRPivot.current.rotation.y = -steering.current;
+      }
       
-        const targetAngle = bonnetPressed
-          ? maxOpenAngle
-          : 0;
+      if (wheelFL.current) {
+        wheelFL.current.rotation.x += wheelRotation;
+      }
       
-        bonnetPivot.current.rotation.x = THREE.MathUtils.damp(
-          bonnetPivot.current.rotation.x,
-          targetAngle,
-          openSpeed,
-          delta
-        );
-      });
+      if (wheelFR.current) {
+        wheelFR.current.rotation.x += wheelRotation;
+      }
+      
+      if (wheelRL.current) {
+        wheelRL.current.rotation.x += wheelRotation;
+      }
+      
+      if (wheelRR.current) {
+        wheelRR.current.rotation.x += wheelRotation;
+      }
+  });
 
-      useFrame((_, delta) => {
-        if (lightsMatRef.current) {
-          const targetIntensity = lightsPressed ? 5 : 0; 
-          
+  useFrame((_, delta) => {
+    if (!bonnetPivot.current) return;
+  
+    const openSpeed = 4;
+    const maxOpenAngle = -0.8;
+  
+    const targetAngle = bonnetPressed
+      ? maxOpenAngle
+      : 0;
+  
+    bonnetPivot.current.rotation.x = THREE.MathUtils.damp(
+      bonnetPivot.current.rotation.x,
+      targetAngle,
+      openSpeed,
+      delta
+    );
+  });
 
-          lightsMatRef.current.emissive = new THREE.Color("yellow"); 
-          lightsMatRef.current.emissiveIntensity += (targetIntensity - lightsMatRef.current.emissiveIntensity) * Math.min(10 * delta, 1);
-        }
-      });
+  useFrame((_, delta) => {
+    if (!lightsMatRef.current) return;
+  
+    const targetIntensity = lightsPressed ? 5 : 0;
+  
+    lightsMatRef.current.emissive.set("yellow");
+  
+    lightsMatRef.current.emissiveIntensity = THREE.MathUtils.damp(
+      lightsMatRef.current.emissiveIntensity,
+      targetIntensity,
+      10,
+      delta
+    );
+  });
 
   return (
     <>
@@ -173,7 +317,17 @@ export default function Experience({carColor} : ExperienceProps) {
         far={4}
       />
 
-      <primitive  object={car.scene} scale = {100} position = {[0, 0.06, 0]} />
+<group
+  ref={carRef}
+  position={[0, 0.06, 0]}
+>
+  <primitive
+    object={car.scene}
+    scale={100}
+  />
+</group>
+
+
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
   <planeGeometry args={[50, 50]} />
